@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class DocumentPreprocess {
 
@@ -30,7 +31,8 @@ public class DocumentPreprocess {
 
             while ((line = reader.readLine()) != null) {
                 line = line.toLowerCase();
-                line = line.replaceAll("[" + symbolsToRemove + "]", "");
+                line = line.replaceAll("[" + Pattern.quote(symbolsToRemove) + "]", "");
+
 
                 String[] words = line.split("\\s+");
                 for (String word : words) {
@@ -50,5 +52,17 @@ public class DocumentPreprocess {
             e.printStackTrace();
         }
         return outputFilePath;
+    }
+
+    public static void clearOutputFolder() {
+        System.out.println("Clearing output folder...");
+        File folder = new File("data/preprocessed_files");
+        File[] files = folder.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            file.delete();
+        }
     }
 }

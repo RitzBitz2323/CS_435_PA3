@@ -6,6 +6,9 @@ public class ritztest {
 		System.out.println(((System.currentTimeMillis() - timeStart)/1000) + " seconds"); // seconds to create inverted index
 		System.out.println(ps.termFrequency("beach", "Zach_Duke.txt"));
 		System.out.println(ps.docFrequency("beach"));
+        System.out.println(ps.TPScore("beach food gross peaches up georgia zach had none", "Zach_Duke.txt"));
+        System.out.println(ps.VSScore("apple tonka truck car smooth lets go", "Zach_Duke.txt"));
+
 		//System.out.println(ps.postingsList("s"));
 	}
 	

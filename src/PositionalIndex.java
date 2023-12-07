@@ -1,8 +1,11 @@
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionalIndex {
 
@@ -27,13 +30,32 @@ public class PositionalIndex {
 
 	}
 	
-	int termFrequency(String term, String Doc) {
-		return invertedIndex.get(term.toLowerCase()).get(Doc).size();
-	}
+  public int termFrequency(String term, String Doc){
+        Map<String, List<Integer>> enumerationsOfTerm = PositionalIndex.get(term);
+        if(PositionalIndex.containsKey(term) == false){
+            return 0;
+        }
+        else if(enumerationsOfTerm.containsKey(Doc) == false){
+            return 0;
+        }
+        return enumerationsOfTerm.get(Doc).size();
+    }
+
+    public int docFrequency(String term) {
+        if (PositionalIndex.containsKey(term) == false) {
+          return 0;
+        }
+        else{
+        return PositionalIndex.get(term).size();
+        }
+    }
+// 	int termFrequency(String term, String Doc) {
+// 		return invertedIndex.get(term.toLowerCase()).get(Doc).size();
+// 	}
 	
-	int docFrequency(String term) {
-		return invertedIndex.get(term.toLowerCase()).keySet().size();
-	}
+// 	int docFrequency(String term) {
+// 		return invertedIndex.get(term.toLowerCase()).keySet().size();
+// 	}
 	
 	String postingsList(String t) {
 		//TODO
@@ -76,5 +98,4 @@ public class PositionalIndex {
 	double Relevance(String query, String doc) {
 		return 0.6 * TPScore(query, doc) + 0.4 * VSScore(query, doc); 
 	}
-	
 }

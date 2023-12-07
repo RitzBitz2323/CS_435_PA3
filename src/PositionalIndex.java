@@ -18,7 +18,7 @@ public class PositionalIndex {
 		invertedIndex = new HashMap<String, HashMap<String, ArrayList<Integer>>>();
 		
 		for (String doc : dataFolder.list()) {
-			LinkedHashMap<String, ArrayList<Integer>> docProcessed = DocumentPreprocess.proccessDoc(dataFolder.getAbsolutePath() + "\\" + doc);
+			LinkedHashMap<String, ArrayList<Integer>> docProcessed = DocumentPreprocess.processing(dataFolder.getAbsolutePath() + '\\' + doc);
 			for (String term : docProcessed.keySet()) {
 				if (!invertedIndex.containsKey(term)) {
       	          invertedIndex.put(term, new HashMap<String, ArrayList<Integer>>());

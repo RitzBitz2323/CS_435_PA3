@@ -4,10 +4,10 @@ public class ritztest {
 		long timeStart = System.currentTimeMillis();
 		PositionalIndex ps = new PositionalIndex("/Users/rambekar/CS_435/CS_435_PA3/data/IR");
 		System.out.println(((System.currentTimeMillis() - timeStart)/1000) + " seconds"); // seconds to create inverted index
-		System.out.println(ps.termFrequency("beach", "Zach_Duke.txt"));
-		System.out.println(ps.docFrequency("beach"));
-        System.out.println(ps.TPScore("beach food gross peaches up georgia zach had none", "Zach_Duke.txt"));
-        System.out.println(ps.VSScore("apple tonka truck car smooth lets go", "Zach_Duke.txt"));
+		System.out.println(ps.termFrequency("striking", "Zach_Duke.txt"));
+		System.out.println(ps.docFrequency("striking"));
+        System.out.println(ps.TPScore("striking out nine and receiving pirates ball hit", "Zach_Duke.txt"));
+        System.out.println(ps.VSScore("striking out nine and receiving pirates ball hit", "Zach_Duke.txt"));
 
 		//System.out.println(ps.postingsList("s"));
 	}

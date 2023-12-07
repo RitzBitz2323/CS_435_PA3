@@ -2,9 +2,11 @@
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionalIndex {
@@ -42,14 +44,7 @@ public class PositionalIndex {
         return enumerationsOfTerm.get(Doc).size();
     }
 
-    public int docFrequency(String term) {
-        if (invertedIndex.containsKey(term) == false) {
-          return 0;
-        }
-        else{
-        return invertedIndex.get(term).size();
-        }
-    }
+    
 // 	int termFrequency(String term, String Doc) {
 // 		return invertedIndex.get(term.toLowerCase()).get(Doc).size();
 // 	}
@@ -133,38 +128,116 @@ public class PositionalIndex {
     }
 	
 	public double VSScore(String query, String doc) {
-        // Extract all terms from the collection of documents
-        Map<String, Integer> termFrequenciesInQuery = termFrequency(query, doc);
-        Map<String, Double> weightsInQuery = calculateWeights(termFrequenciesInQuery);
+    Map<String, Double> vectorQuery = calculateVector(query);
+    Map<String, Double> vectorDoc = calculateVector(doc);
+    
+    // Check for common terms in both vectors
+    Set<String> commonTerms = new HashSet<>(vectorQuery.keySet());
+    commonTerms.retainAll(vectorDoc.keySet());
 
-        Map<String, Integer> termFrequenciesInDoc = getTermFrequencies(doc);
-        Map<String, Double> weightsInDoc = calculateWeights(termFrequenciesInDoc);
-
-        // Calculate the cosine similarity between the query vector and the document vector
-        double cosineSimilarity = calculateCosineSimilarity(weightsInQuery, weightsInDoc);
-
-        return cosineSimilarity;
+    // If there are no common terms, cosine similarity is undefined, return 0
+    if (commonTerms.isEmpty()) {
+        return 0.0;
     }
 
-    private double calculateCosineSimilarity(Map<String, Double> vector1, Map<String, Double> vector2) {
-        // Calculate the cosine similarity between two vectors
-        double dotProduct = 0.0;
-        double normVector1 = 0.0;
-        double normVector2 = 0.0;
+    // Create new vectors with only common terms
+    Map<String, Double> commonVectorQuery = new HashMap<>();
+    Map<String, Double> commonVectorDoc = new HashMap<>();
 
+    for (String term : commonTerms) {
+        commonVectorQuery.put(term, vectorQuery.get(term));
+        commonVectorDoc.put(term, vectorDoc.get(term));
+    }
+
+    // Calculate the cosine similarity between the common vectors
+    double cosineSimilarity = cosSim(commonVectorQuery, commonVectorDoc);
+    return cosineSimilarity;
+}
+
+    
+    private Map<String, Double> calculateVector(String text) {
+        Map<String, Integer> termFrequencies = getTermFrequencies(text);
+        Map<String, Double> weights = calculateWeights(termFrequencies);
+    
+        return weights;
+    }
+    
+    public double cosSim(Map<String, Double> vector1, Map<String, Double> vector2) {
+        // Check if both vectors have the same dimensionality
+        if (!vector1.keySet().equals(vector2.keySet())) {
+            throw new IllegalArgumentException(
+                    "Vectors must have the same dimensionality to compute cosine similarity");
+        }
+    
+        // Check if vector dimensionality is greater than 0
+        if (vector1.isEmpty()) {
+            throw new IllegalArgumentException("Vector dimensionality must be greater than 0");
+        }
+    
+        double numerator = 0;
+        double a2Sum = 0;
+        double b2Sum = 0;
+    
+        // Iterate over the common terms in both vectors
         for (String term : vector1.keySet()) {
-            dotProduct += vector1.get(term) * vector2.getOrDefault(term, 0.0);
-            normVector1 += Math.pow(vector1.get(term), 2);
-            normVector2 += Math.pow(vector2.getOrDefault(term, 0.0), 2);
+            double value1 = vector1.get(term);
+            double value2 = vector2.getOrDefault(term, 0.0);
+    
+            numerator += value1 * value2;
+            a2Sum += Math.pow(value1, 2);
+            b2Sum += Math.pow(value2, 2);
         }
-
-        if (normVector1 == 0.0 || normVector2 == 0.0) {
-            // Prevent division by zero
-            return 0.0;
+    
+        double denominator = Math.sqrt(a2Sum) * Math.sqrt(b2Sum);
+    
+        if (denominator == 0) {
+            return 0;
         }
-
-        return dotProduct / (Math.sqrt(normVector1) * Math.sqrt(normVector2));
+    
+        return numerator / denominator;
     }
+    
+    
+    private Map<String, Integer> getTermFrequencies(String text) {
+        // Count the frequency of each term in the given text
+        Map<String, Integer> termFrequencies = new HashMap<>();
+        String[] terms = text.toLowerCase().split("\\s+");
+    
+        for (String term : terms) {
+            termFrequencies.put(term, termFrequencies.getOrDefault(term, 0) + 1);
+        }
+    
+        return termFrequencies;
+    }
+    
+    private Map<String, Double> calculateWeights(Map<String, Integer> termFrequencies) {
+        // Calculate the weights of each term based on the given formula
+        Map<String, Double> weights = new HashMap<>();
+        int totalDocuments = dataFolder.list().length;
+    
+        for (String term : termFrequencies.keySet()) {
+            int termFrequency = termFrequencies.get(term);
+            int documentFrequency = docFrequency(term);
+    
+            double weight = Math.sqrt(termFrequency) * Math.log10((double) totalDocuments / documentFrequency);
+            weights.put(term, weight);
+        }
+    
+        return weights;
+    }
+    
+    public int docFrequency(String term) {
+        // Get the document frequency of the term in the collection
+        if (invertedIndex.containsKey(term)) {
+            return invertedIndex.get(term).size();
+        } else {
+            // Term is not present in the inverted index
+            return 0;
+        }
+    }
+    
+
+    
 	
 	double Relevance(String query, String doc) {
 		return 0.6 * TPScore(query, doc) + 0.4 * VSScore(query, doc); 

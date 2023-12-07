@@ -72,7 +72,7 @@ public class PositionalIndex {
 					}
 				}
 				docList += ">";
-				postList += docList + ",";
+				String finalList = postList + docList + ",";
 //				System.out.print(docList);
 		});
 		postList += "]";

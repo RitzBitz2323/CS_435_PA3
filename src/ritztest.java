@@ -7,7 +7,9 @@ public class ritztest {
 		System.out.println(ps.termFrequency("striking", "Zach_Duke.txt"));
 		System.out.println(ps.docFrequency("striking"));
         System.out.println(ps.TPScore("striking out nine and receiving pirates ball hit", "Zach_Duke.txt"));
-        System.out.println(ps.VSScore("striking out nine and receiving pirates ball hit", "Zach_Duke.txt"));
+        System.out.println(ps.VSScore("striking out nine and receiving pirates ball hit", "ach_Duke.txt"));
+        System.out.println(ps.Relevance("striking out nine and receiving pirates ball hit", "Zach_Duke.txt"));
+
 
 		//System.out.println(ps.postingsList("s"));
 	}

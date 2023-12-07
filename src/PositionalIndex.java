@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionalIndex {
 
@@ -129,7 +128,10 @@ public class PositionalIndex {
 	
 	public double VSScore(String query, String doc) {
     Map<String, Double> vectorQuery = calculateVector(query);
+    
     Map<String, Double> vectorDoc = calculateVector(doc);
+
+
     
     // Check for common terms in both vectors
     Set<String> commonTerms = new HashSet<>(vectorQuery.keySet());
@@ -139,7 +141,7 @@ public class PositionalIndex {
     if (commonTerms.isEmpty()) {
         return 0.0;
     }
-
+    System.out.println("common terms isnt empty");
     // Create new vectors with only common terms
     Map<String, Double> commonVectorQuery = new HashMap<>();
     Map<String, Double> commonVectorDoc = new HashMap<>();
@@ -155,12 +157,46 @@ public class PositionalIndex {
 }
 
     
-    private Map<String, Double> calculateVector(String text) {
-        Map<String, Integer> termFrequencies = getTermFrequencies(text);
-        Map<String, Double> weights = calculateWeights(termFrequencies);
-    
-        return weights;
+private Map<String, Double> calculateVector(String text) {
+    Map<String, Integer> termFrequencies = getTermFrequencies(text);
+    Map<String, Double> weights = calculateWeights(termFrequencies);
+
+   
+
+    return weights;
+}
+
+private Map<String, Integer> getTermFrequencies(String text) {
+    Map<String, Integer> termFrequencies = new HashMap<>();
+    String[] terms = text.toLowerCase().split("\\s+");
+
+    for (String term : terms) {
+        termFrequencies.put(term, termFrequencies.getOrDefault(term, 0) + 1);
     }
+
+    return termFrequencies;
+}
+
+private Map<String, Double> calculateWeights(Map<String, Integer> termFrequencies) {
+    Map<String, Double> weights = new HashMap<>();
+    int totalDocuments = dataFolder.list().length;
+
+    for (String term : termFrequencies.keySet()) {
+        int termFrequency = termFrequencies.get(term);
+        int documentFrequency = docFrequency(term);
+
+        // Skip terms with zero document frequency
+        if (documentFrequency == 0) {
+            continue;
+        }
+
+        double weight = Math.sqrt(termFrequency) * Math.log10((double) totalDocuments / documentFrequency);
+        weights.put(term, weight);
+    }
+
+    return weights;
+}
+
     
     public double cosSim(Map<String, Double> vector1, Map<String, Double> vector2) {
         // Check if both vectors have the same dimensionality
@@ -182,7 +218,7 @@ public class PositionalIndex {
         for (String term : vector1.keySet()) {
             double value1 = vector1.get(term);
             double value2 = vector2.getOrDefault(term, 0.0);
-    
+
             numerator += value1 * value2;
             a2Sum += Math.pow(value1, 2);
             b2Sum += Math.pow(value2, 2);
@@ -195,35 +231,6 @@ public class PositionalIndex {
         }
     
         return numerator / denominator;
-    }
-    
-    
-    private Map<String, Integer> getTermFrequencies(String text) {
-        // Count the frequency of each term in the given text
-        Map<String, Integer> termFrequencies = new HashMap<>();
-        String[] terms = text.toLowerCase().split("\\s+");
-    
-        for (String term : terms) {
-            termFrequencies.put(term, termFrequencies.getOrDefault(term, 0) + 1);
-        }
-    
-        return termFrequencies;
-    }
-    
-    private Map<String, Double> calculateWeights(Map<String, Integer> termFrequencies) {
-        // Calculate the weights of each term based on the given formula
-        Map<String, Double> weights = new HashMap<>();
-        int totalDocuments = dataFolder.list().length;
-    
-        for (String term : termFrequencies.keySet()) {
-            int termFrequency = termFrequencies.get(term);
-            int documentFrequency = docFrequency(term);
-    
-            double weight = Math.sqrt(termFrequency) * Math.log10((double) totalDocuments / documentFrequency);
-            weights.put(term, weight);
-        }
-    
-        return weights;
     }
     
     public int docFrequency(String term) {
@@ -242,4 +249,14 @@ public class PositionalIndex {
 	double Relevance(String query, String doc) {
 		return 0.6 * TPScore(query, doc) + 0.4 * VSScore(query, doc); 
 	}
+    public Map<String, Double> calculateRelevanceScores(String query) {
+        Map<String, Double> relevanceScores = new HashMap<>();
+    
+        for (String document : dataFolder.list()) {
+            double relevanceScore = Relevance(query, document);
+            relevanceScores.put(document, relevanceScore);
+        }
+    
+        return relevanceScores;
+    }
 }

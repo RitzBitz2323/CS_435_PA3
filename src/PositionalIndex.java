@@ -18,7 +18,7 @@ public class PositionalIndex {
 		invertedIndex = new HashMap<String, HashMap<String, ArrayList<Integer>>>();
 		
 		for (String doc : dataFolder.list()) {
-			LinkedHashMap<String, ArrayList<Integer>> docProcessed = DocumentPreprocess.proccessDoc(dataFolder.getAbsolutePath() + "\\" + doc);
+			LinkedHashMap<String, ArrayList<Integer>> docProcessed = DocumentPreprocess.proccessDoc(dataFolder.getAbsolutePath() + '\\' + doc);
 			for (String term : docProcessed.keySet()) {
 				if (!invertedIndex.containsKey(term)) {
       	          invertedIndex.put(term, new HashMap<String, ArrayList<Integer>>());
@@ -31,8 +31,8 @@ public class PositionalIndex {
 	}
 	
   public int termFrequency(String term, String Doc){
-        Map<String, List<Integer>> enumerationsOfTerm = PositionalIndex.get(term);
-        if(PositionalIndex.containsKey(term) == false){
+        HashMap<String, ArrayList<Integer>> enumerationsOfTerm = invertedIndex.get(term);
+        if(invertedIndex.containsKey(term) == false){
             return 0;
         }
         else if(enumerationsOfTerm.containsKey(Doc) == false){
@@ -42,11 +42,11 @@ public class PositionalIndex {
     }
 
     public int docFrequency(String term) {
-        if (PositionalIndex.containsKey(term) == false) {
+        if (invertedIndex.containsKey(term) == false) {
           return 0;
         }
         else{
-        return PositionalIndex.get(term).size();
+        return invertedIndex.get(term).size();
         }
     }
 // 	int termFrequency(String term, String Doc) {

@@ -18,7 +18,8 @@ public class PositionalIndex {
 		invertedIndex = new HashMap<String, HashMap<String, ArrayList<Integer>>>();
 		
 		for (String doc : dataFolder.list()) {
-			LinkedHashMap<String, ArrayList<Integer>> docProcessed = DocumentPreprocess.proccessDoc(dataFolder.getAbsolutePath() + '\\' + doc);
+			LinkedHashMap<String, ArrayList<Integer>> docProcessed = DocumentPreprocess.proccessDoc(dataFolder.getAbsolutePath() + '/' + doc);
+            // "\\" could be inputted in process doc 
 			for (String term : docProcessed.keySet()) {
 				if (!invertedIndex.containsKey(term)) {
       	          invertedIndex.put(term, new HashMap<String, ArrayList<Integer>>());
@@ -57,28 +58,28 @@ public class PositionalIndex {
 // 		return invertedIndex.get(term.toLowerCase()).keySet().size();
 // 	}
 	
-	String postingsList(String t) {
-		//TODO
-		HashMap<String, ArrayList<Integer>> postings = invertedIndex.get(t.toLowerCase());
-		String postList = "[";
-		//loops...
-		postings.forEach((key, value) -> {
-				String docList = "<" + key + " : ";
-				ArrayList<Integer> vals = value;
-				for (int i = 0; i < vals.size(); i++) {
-					docList += vals.get(i);
-					if (i != vals.size() - 1) {
-						docList += ",";
-					}
-				}
-				docList += ">";
-				String finalList = postList + docList + ",";
-//				System.out.print(docList);
-		});
-		postList += "]";
-//		System.out.println(postList);
-		return postList;
-	}
+// 	String postingsList(String t) {
+// 		//TODO
+// 		HashMap<String, ArrayList<Integer>> postings = invertedIndex.get(t.toLowerCase());
+// 		String postList = "[";
+// 		//loops...
+// 		postings.forEach((key, value) -> {
+// 				String docList = "<" + key + " : ";
+// 				ArrayList<Integer> vals = value;
+// 				for (int i = 0; i < vals.size(); i++) {
+// 					docList += vals.get(i);
+// 					if (i != vals.size() - 1) {
+// 						docList += ",";
+// 					}
+// 				}
+// 				docList += ">";
+// 				String finalList = postList + docList + ",";
+// //				System.out.print(docList);
+// 		});
+// 		postList += "]";
+// //		System.out.println(postList);
+// 		return postList;
+// 	}
 	
 	double weight(String t, String d) {
 		// w(t,d) = sqrt(TFtd) * log10(N/DFt)
